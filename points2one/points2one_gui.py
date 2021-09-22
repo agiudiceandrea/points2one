@@ -29,17 +29,19 @@ from os.path import basename
 from os.path import dirname
 from os.path import splitext
 
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
+from qgis.PyQt.QtCore import *
+from qgis.PyQt.QtGui import *
+from qgis.PyQt.QtWidgets import QDialog, QFileDialog, QMessageBox
 from qgis.core import *
 from qgis.gui import *
 
-from ui_frmPoints2One import Ui_Dialog
-from p2o_encodings import getEncodings
-from p2o_encodings import getDefaultEncoding
-from p2o_encodings import setDefaultEncoding
-from p2o_engine import Engine
-from p2o_errors import P2OError
+
+from .ui_frmPoints2One import Ui_Dialog
+from .p2o_encodings import getEncodings
+from .p2o_encodings import getDefaultEncoding
+from .p2o_encodings import setDefaultEncoding
+from .p2o_engine import Engine
+from .p2o_errors import P2OError
 
 
 class points2One(QDialog, Ui_Dialog):
@@ -47,9 +49,10 @@ class points2One(QDialog, Ui_Dialog):
         QDialog.__init__(self)
         self.iface = iface
         self.setupUi(self)
-        QObject.connect(self.wBrowse, SIGNAL('clicked()'), self.outFile)
-        QObject.connect(self.wSort1, SIGNAL('toggled(bool)'),
-            self.sort1_toggled)
+        #QObject.connect(self.wBrowse, SIGNAL('clicked()'), self.outFile)
+        self.wBrowse.clicked.connect(self.outFile)
+        #QObject.connect(self.wSort1, SIGNAL('toggled(bool)'), self.sort1_toggled)
+        self.wSort1.toggled.connect(self.sort1_toggled)
         for combo in (self.wGroupField, self.wSortField1, self.wSortField2):
             combo.setLayer(self.layer())
             combo.setCurrentIndex(0)
@@ -67,9 +70,9 @@ class points2One(QDialog, Ui_Dialog):
     def output_geometry(self):
         """Return the selected output geometry."""
         if self.wCreateLines.isChecked():
-            return QGis.WKBLineString
+            return QgsWkbTypes.LineString
         else:
-            return QGis.WKBPolygon
+            return QgsWkbTypes.Polygon
 
     def close_lines(self):
         """Return whether lines must be closed."""
@@ -170,7 +173,7 @@ class points2One(QDialog, Ui_Dialog):
         try:
             self._accept()
         except P2OError as e:
-            QMessageBox.critical(self, 'Points2One', e.message)
+            QMessageBox.critical(self, 'Points2One', str(e))
 
     def sort1_toggled(self, checked):
         if not checked:
@@ -198,7 +201,7 @@ def saveDialog(parent):
     key = '/UI/lastShapefileDir'
     outDir = settings.value(key)
     filter = 'Shapefiles (*.shp)'
-    outFilePath = QFileDialog.getSaveFileName(parent, parent.tr('Save output shapefile'), outDir, filter)
+    outFilePath, filter_string = QFileDialog.getSaveFileName(parent, parent.tr('Save output shapefile'), outDir, filter)
     outFilePath = unicode(outFilePath)
     if outFilePath:
         root, ext = splitext(outFilePath)
@@ -218,5 +221,5 @@ def addShapeToCanvas(shapeFilePath):
     if ext == '.shp':
         layerName = root
     vlayer_new = QgsVectorLayer(shapeFilePath, layerName, "ogr")
-    ret = QgsMapLayerRegistry.instance().addMapLayer(vlayer_new)
+    ret = QgsProject.instance().addMapLayer(vlayer_new)
     return ret

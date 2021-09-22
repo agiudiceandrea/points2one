@@ -27,30 +27,31 @@
 import os
 import sys
 
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
+from qgis.PyQt.QtCore import *
+from qgis.PyQt.QtGui import *
+from qgis.PyQt.QtWidgets import QAction
 from qgis.core import *
 
-import resources
-import points2one_gui
+from .resources import *
+from .points2one_gui import *
 
 
 class points2one(object):
     def __init__(self, iface):
         self.iface = iface
-        self.load_translation()
+#        self.load_translation()
 
-    def load_translation(self):
-        ## Initialise the translation environment.
-        locale = QSettings().value('locale/userLocale')
-        filepath = unicode(__file__, encoding=sys.getfilesystemencoding())
-        locale_path = os.path.join(os.path.dirname(filepath), 'i18n',
-            ''.join(['points2one_', locale, '.qm']))
-        if QFileInfo(locale_path).exists():
-            self.translator = QTranslator()
-            self.translator.load(locale_path)
-            if qVersion() > '4.3.3':
-                QCoreApplication.installTranslator(self.translator)
+#    def load_translation(self):
+#        ## Initialise the translation environment.
+#        locale = QSettings().value('locale/userLocale')
+#        filepath = unicode(__file__, encoding=sys.getfilesystemencoding())
+#        locale_path = os.path.join(os.path.dirname(filepath), 'i18n',
+#            ''.join(['points2one_', locale, '.qm']))
+#        if QFileInfo(locale_path).exists():
+#            self.translator = QTranslator()
+#            self.translator.load(locale_path)
+#            if qVersion() > '4.3.3':
+#                QCoreApplication.installTranslator(self.translator)
 
     def initGui(self):
         # create action 
@@ -60,7 +61,8 @@ class points2one(object):
             self.iface.mainWindow()
         )
         self.action.setWhatsThis('Create polygons and lines from vertices.')
-        QObject.connect(self.action, SIGNAL('triggered()'), self.run)
+        # QObject.connect(self.action, SIGNAL('triggered()'), self.run)
+        self.action.triggered.connect(self.run)
         # add toolbar button and menu item
         self.iface.addVectorToolBarIcon(self.action)
         self.iface.addPluginToVectorMenu('&Points2One', self.action)
@@ -71,5 +73,5 @@ class points2one(object):
         self.iface.removeVectorToolBarIcon(self.action)
 
     def run(self):
-        dialog = points2one_gui.points2One(self.iface)
+        dialog = points2One(self.iface)
         dialog.exec_()

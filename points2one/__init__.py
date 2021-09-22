@@ -52,5 +52,5 @@ def category():
   return 'Vector'
 
 def classFactory(iface):
-	from points2one_plugin import points2one
+	from .points2one_plugin import points2one
 	return points2one(iface)
