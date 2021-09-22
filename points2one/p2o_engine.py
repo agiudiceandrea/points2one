@@ -53,8 +53,8 @@ class Engine(object):
         check = QFile(self.fname)
         if check.exists():
             if not QgsVectorFileWriter.deleteShapeFile(self.fname):
-                msg = 'Unable to delete existing shapefile "{}"'
-                raise P2OError(msg = msg.format(self.name))
+                msg = 'Unable to delete existing shapefile "{}"'.format(self.fname)
+                raise P2OError(msg)
         provider = self.layer.dataProvider()
         writer = QgsVectorFileWriter(self.fname, self.encoding,
             provider.fields(), self.wkb_type, self.layer.crs(), 'ESRI Shapefile')
